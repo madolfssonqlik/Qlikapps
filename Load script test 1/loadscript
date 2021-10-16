@@ -1,1 +1,78 @@
-{"qScript":"\/\/\/$tab Main\r\nSET ThousandSep=',';\r\nSET DecimalSep='.';\r\nSET MoneyThousandSep=',';\r\nSET MoneyDecimalSep='.';\r\nSET MoneyFormat='$ ###0.00;-$ ###0.00';\r\nSET TimeFormat='h:mm:ss TT';\r\nSET DateFormat='M\/D\/YYYY';\r\nSET TimestampFormat='M\/D\/YYYY h:mm:ss[.fff] TT';\r\nSET FirstWeekDay=6;\r\nSET BrokenWeeks=1;\r\nSET ReferenceDay=0;\r\nSET FirstMonthOfYear=1;\r\nSET CollationLocale='en-US';\r\nSET CreateSearchIndexOnReload=1;\r\nSET MonthNames='Jan;Feb;Mar;Apr;May;Jun;Jul;Aug;Sep;Oct;Nov;Dec';\r\nSET LongMonthNames='January;February;March;April;May;June;July;August;September;October;November;December';\r\nSET DayNames='Mon;Tue;Wed;Thu;Fri;Sat;Sun';\r\nSET LongDayNames='Monday;Tuesday;Wednesday;Thursday;Friday;Saturday;Sunday';\r\nSET NumericalAbbreviation='3:k;6:M;9:G;12:T;15:P;18:E;21:Z;24:Y;-3:m;-6:\u03bc;-9:n;-12:p;-15:f;-18:a;-21:z;-24:y';\r\n\r\n\/\/\/$tab Auto-generated section\r\nSet dataManagerTables = '','MOCK_DATA (2)';\r\n\/\/This block renames script tables from non generated section which conflict with the names of managed tables\r\n\r\nFor each name in $(dataManagerTables) \r\n    Let index = 0;\r\n    Let currentName = name; \r\n    Let tableNumber = TableNumber(name); \r\n    Let matches = 0; \r\n    Do while not IsNull(tableNumber) or (index > 0 and matches > 0)\r\n        index = index + 1; \r\n        currentName = name & '-' & index; \r\n        tableNumber = TableNumber(currentName) \r\n        matches = Match('$(currentName)', $(dataManagerTables));\r\n    Loop \r\n    If index > 0 then \r\n            Rename Table '$(name)' to '$(currentName)'; \r\n    EndIf; \r\nNext; \r\nSet dataManagerTables = ;\r\n\r\n\r\nUnqualify *;\r\n\r\n__countryGeoBase:\r\nLOAD\r\n\tISO3Code AS [__ISO3Code],\r\n\tISO2Code AS [__ISO2Code],\r\n\tPolygon AS [__Polygon]\r\nFROM [lib:\/\/DataFiles\/countryGeo.qvd]\r\n(qvd);\r\n\r\n__countryCodeIsoTwo2Polygon:\r\nMAPPING LOAD\r\n\t__ISO2Code,\r\n\t__Polygon\r\nRESIDENT __countryGeoBase;\r\n\r\n[MOCK_DATA (2)]:\r\nLOAD\r\n\t[id],\r\n\t'[first_name] as  [morgan]',\r\n\t[last_name],\r\n\t[email],\r\n\t[country],\r\n\t[TCV],\r\n\tAPPLYMAP( '__countryCodeIsoTwo2Polygon', UPPER([country]), '-') AS [MOCK_DATA (2).country_GeoInfo]\r\n FROM [lib:\/\/DataFiles\/MOCK_DATA (2).csv]\r\n(txt, codepage is 28591, embedded labels, delimiter is ',', msq);\r\n\r\n\r\n\r\nTAG FIELD [country] WITH '$geoname', '$relates_MOCK_DATA (2).country_GeoInfo';\r\nTAG FIELD [MOCK_DATA (2).country_GeoInfo] WITH '$geopolygon', '$hidden', '$relates_country';\r\n\r\nDROP TABLES __countryGeoBase;\r\n\r\n"}
+///$tab Main
+SET ThousandSep=',';
+SET DecimalSep='.';
+SET MoneyThousandSep=',';
+SET MoneyDecimalSep='.';
+SET MoneyFormat='$ ###0.00;-$ ###0.00';
+SET TimeFormat='h:mm:ss TT';
+SET DateFormat='M/D/YYYY';
+SET TimestampFormat='M/D/YYYY h:mm:ss[.fff] TT';
+SET FirstWeekDay=6;
+SET BrokenWeeks=1;
+SET ReferenceDay=0;
+SET FirstMonthOfYear=1;
+SET CollationLocale='en-US';
+SET CreateSearchIndexOnReload=1;
+SET MonthNames='Jan;Feb;Mar;Apr;May;Jun;Jul;Aug;Sep;Oct;Nov;Dec';
+SET LongMonthNames='January;February;March;April;May;June;July;August;September;October;November;December';
+SET DayNames='Mon;Tue;Wed;Thu;Fri;Sat;Sun';
+SET LongDayNames='Monday;Tuesday;Wednesday;Thursday;Friday;Saturday;Sunday';
+SET NumericalAbbreviation='3:k;6:M;9:G;12:T;15:P;18:E;21:Z;24:Y;-3:m;-6:μ;-9:n;-12:p;-15:f;-18:a;-21:z;-24:y';
+
+///$tab Auto-generated section
+Set dataManagerTables = '','MOCK_DATA (2)';
+//This block renames script tables from non generated section which conflict with the names of managed tables
+
+For each name in $(dataManagerTables) 
+    Let index = 0;
+    Let currentName = name; 
+    Let tableNumber = TableNumber(name); 
+    Let matches = 0; 
+    Do while not IsNull(tableNumber) or (index > 0 and matches > 0)
+        index = index + 1; 
+        currentName = name & '-' & index; 
+        tableNumber = TableNumber(currentName) 
+        matches = Match('$(currentName)', $(dataManagerTables));
+    Loop 
+    If index > 0 then 
+            Rename Table '$(name)' to '$(currentName)'; 
+    EndIf; 
+Next; 
+Set dataManagerTables = ;
+
+
+Unqualify *;
+
+__countryGeoBase:
+LOAD
+	ISO3Code AS [__ISO3Code],
+	ISO2Code AS [__ISO2Code],
+	Polygon AS [__Polygon]
+FROM [lib://DataFiles/countryGeo.qvd]
+(qvd);
+
+__countryCodeIsoTwo2Polygon:
+MAPPING LOAD
+	__ISO2Code,
+	__Polygon
+RESIDENT __countryGeoBase;
+
+[MOCK_DATA (2)]:
+LOAD
+	[id],
+	'[first_name] as  [morgan]',
+	[last_name],
+	[email],
+	[country],
+	[TCV],
+	APPLYMAP( '__countryCodeIsoTwo2Polygon', UPPER([country]), '-') AS [MOCK_DATA (2).country_GeoInfo]
+ FROM [lib://DataFiles/MOCK_DATA (2).csv]
+(txt, codepage is 28591, embedded labels, delimiter is ',', msq);
+
+
+
+TAG FIELD [country] WITH '$geoname', '$relates_MOCK_DATA (2).country_GeoInfo';
+TAG FIELD [MOCK_DATA (2).country_GeoInfo] WITH '$geopolygon', '$hidden', '$relates_country';
+
+DROP TABLES __countryGeoBase;
+
